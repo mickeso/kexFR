@@ -218,7 +218,7 @@ namespace FaceTracking3D
 
                         if (faceTrackFrame.TrackSuccessful)
                         {
-                            this.UpdateMesh(faceTrackFrame);
+                           // this.UpdateMesh(faceTrackFrame);
 
                             // Only display the face mesh if there was a successful track.
                             displayFaceMesh = true;
@@ -309,10 +309,10 @@ namespace FaceTracking3D
             int fpSize = fp.Count();
             Vector3DF[] temp = new Vector3DF[fpSize];
             float[] fpRes = new float[(fpSize*fpSize-fpSize)/2];
-            int i = 0;
+            int k = 0;
             foreach(Vector3DF p in fp) {
-                temp[i] = p;
-                i++;
+                temp[k] = p;
+                k++;
             }
         for(int i=0; i < fpSize; i++ ){
             for (int j = 0; j < i; j++) { 
@@ -348,7 +348,7 @@ namespace FaceTracking3D
             
  
 
-            facePointsADist = new float[];
+            facePointsADist = new float[100];
             
                 facePointsADist[0] = (float) Math.Sqrt(Math.Pow(fpA[23].X - fpA[56].X, 2) + Math.Pow(fpA[23].Y - fpA[56].Y, 2) + Math.Pow(fpA[23].Z - fpA[56].Z, 2));
                          // MessageBox.Show("saved"+faceTrackFrame.GetTriangles()[0].Second);

@@ -55,6 +55,8 @@ namespace FaceTracking3D
 
         private float[] facePointsADist = null;
 
+        private float[] facePointsBDist = null;
+
         public TexturedFaceMeshViewer()
         {
             this.DataContext = this;
@@ -308,20 +310,29 @@ namespace FaceTracking3D
     private float[] calcDist(EnumIndexableCollection<FeaturePoint, Vector3DF> fp){
             int fpSize = fp.Count();
             Vector3DF[] temp = new Vector3DF[fpSize];
-            float[] fpRes = new float[(fpSize*fpSize-fpSize)/2];
+            float[] fpRes = new float[fpSize];
             int k = 0;
             foreach(Vector3DF p in fp) {
                 temp[k] = p;
                 k++;
             }
-        for(int i=0; i < fpSize; i++ ){
-            for (int j = 0; j < i; j++) { 
+        for(int i=0; i < fpSize-1; i++ ){
+          //  for (int j = 0; j < i; j++) { 
             // Do stuff to temp!
-            }
+             fpRes[i] = Math.Abs((float)Math.Sqrt(Math.Pow(temp[i].X - temp[i+1].X, 2) + Math.Pow(temp[i].Y - temp[i+1].Y, 2) + Math.Pow(temp[i].Z - temp[i+1].Z, 2)));
+          //  }
         }
 
             return fpRes;
 }
+
+    private float calcDiff(float[] a, float[] b)
+    {
+        float result = 0;
+        for (int i = 0; i < a.Length; i++)
+            result += a[i] - b[i];
+            return result;
+    }
 
         private void Button_Click_Save(object sender, RoutedEventArgs e)
         {
@@ -345,20 +356,22 @@ namespace FaceTracking3D
                      if (facePointsADist == null)
                     {
                     EnumIndexableCollection<FeaturePoint, Vector3DF> fpA = faceTrackFrame.Get3DShape();
-            
- 
 
-            facePointsADist = new float[100];
-            
-                facePointsADist[0] = (float) Math.Sqrt(Math.Pow(fpA[23].X - fpA[56].X, 2) + Math.Pow(fpA[23].Y - fpA[56].Y, 2) + Math.Pow(fpA[23].Z - fpA[56].Z, 2));
+
+
+                    facePointsADist = calcDist(fpA);
+                    
+                //facePointsADist[0] = (float) Math.Sqrt(Math.Pow(fpA[23].X - fpA[56].X, 2) + Math.Pow(fpA[23].Y - fpA[56].Y, 2) + Math.Pow(fpA[23].Z - fpA[56].Z, 2));
                          // MessageBox.Show("saved"+faceTrackFrame.GetTriangles()[0].Second);
                         MessageBox.Show("saved first model");
                     }
                      else
                      {
                          EnumIndexableCollection<FeaturePoint, Vector3DF> fpB = faceTrackFrame.Get3DShape();
-                         float resfpB = (float)Math.Sqrt(Math.Pow(fpB[23].X - fpB[56].X, 2) + Math.Pow(fpB[23].Y - fpB[56].Y, 2) + Math.Pow(fpB[23].Z - fpB[56].Z, 2));
-                         MessageBox.Show(facePointsADist[0] + " - " + resfpB + " = " + (facePointsADist[0] - resfpB));
+                         facePointsBDist = calcDist(fpB); 
+                         //(float)Math.Sqrt(Math.Pow(fpB[23].X - fpB[56].X, 2) + Math.Pow(fpB[23].Y - fpB[56].Y, 2) + Math.Pow(fpB[23].Z - fpB[56].Z, 2));
+                         float finResult = calcDiff(facePointsADist, facePointsBDist);
+                         MessageBox.Show("Final result: " + finResult);
                          facePointsADist = null;
                      }
 

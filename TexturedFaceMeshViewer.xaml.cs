@@ -53,10 +53,11 @@ namespace FaceTracking3D
 
         private FaceTriangle[] triangleIndices;
 
-        private float[] facePointsADist = null;
+        private float[,] facePointsADist = null;
 
-        private float[] facePointsBDist = null;
-
+        private float[,] facePointsBDist = null;
+        //private int howManyPointsA = 0;         // delete this, only for test.
+       //private int howManyPointsB = 0;         // delete this, only for test.
         public TexturedFaceMeshViewer()
         {
             this.DataContext = this;
@@ -307,30 +308,43 @@ namespace FaceTracking3D
            
             }
         
-    private float[] calcDist(EnumIndexableCollection<FeaturePoint, Vector3DF> fp){
+    private float[,] calcDist(EnumIndexableCollection<FeaturePoint, Vector3DF> fp){
             int fpSize = fp.Count();
             Vector3DF[] temp = new Vector3DF[fpSize];
-            float[] fpRes = new float[fpSize];
+            float[,] fpRes = new float[fpSize, fpSize];
             int k = 0;
             foreach(Vector3DF p in fp) {
                 temp[k] = p;
                 k++;
             }
-        for(int i=0; i < fpSize-1; i++ ){
-          //  for (int j = 0; j < i; j++) { 
-            // Do stuff to temp!
-             fpRes[i] = Math.Abs((float)Math.Sqrt(Math.Pow(temp[i].X - temp[i+1].X, 2) + Math.Pow(temp[i].Y - temp[i+1].Y, 2) + Math.Pow(temp[i].Z - temp[i+1].Z, 2)));
-          //  }
-        }
-
+            for (int i = 0; i < (fpSize - 1); i++)
+            {
+                for (int j = 0; j < (fpSize - 1); j++)
+                {
+                    if (i == j) {  }
+                    // Do stuff to temp!
+                    else { 
+                    fpRes[i,j] = Math.Abs((float)Math.Sqrt(Math.Pow(temp[i].X - temp[j].X, 2) + Math.Pow(temp[i].Y - temp[j].Y, 2) + Math.Pow(temp[i].Z - temp[j].Z, 2)));
+                    }
+                }
+            }
             return fpRes;
-}
+    }
+    private int pointsCount(EnumIndexableCollection<FeaturePoint, Vector3DF> fp)
+    {
+        int size = fp.Count();
+        return size;
+    }
 
-    private float calcDiff(float[] a, float[] b)
+    private float calcDiff(float[,] a, float[,] b)
     {
         float result = 0;
-        for (int i = 0; i < a.Length; i++)
-            result += a[i] - b[i];
+        for (int i = 0; i < 121; i++){
+            for (int j = 0; j < 121; j++)
+            {
+                result += a[i,j] - b[i,j];
+            }
+    }
             return result;
     }
 
@@ -360,7 +374,7 @@ namespace FaceTracking3D
 
 
                     facePointsADist = calcDist(fpA);
-                    
+                    //howManyPointsA = pointsCount(fpA);
                 //facePointsADist[0] = (float) Math.Sqrt(Math.Pow(fpA[23].X - fpA[56].X, 2) + Math.Pow(fpA[23].Y - fpA[56].Y, 2) + Math.Pow(fpA[23].Z - fpA[56].Z, 2));
                          // MessageBox.Show("saved"+faceTrackFrame.GetTriangles()[0].Second);
                         MessageBox.Show("saved first model");
@@ -371,6 +385,9 @@ namespace FaceTracking3D
                          facePointsBDist = calcDist(fpB); 
                          //(float)Math.Sqrt(Math.Pow(fpB[23].X - fpB[56].X, 2) + Math.Pow(fpB[23].Y - fpB[56].Y, 2) + Math.Pow(fpB[23].Z - fpB[56].Z, 2));
                          float finResult = calcDiff(facePointsADist, facePointsBDist);
+                 
+                         //howManyPointsB = pointsCount(fpB);
+                         //MessageBox.Show("Points found on fpA: " + howManyPointsA + " and this many for fpB: " + howManyPointsB); // Only to check how many points were found.
                          MessageBox.Show("Final result: " + finResult);
                          facePointsADist = null;
                      }

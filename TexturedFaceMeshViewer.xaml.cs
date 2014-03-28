@@ -59,7 +59,7 @@ namespace FaceTracking3D
 
         private string name = null;
 
-        private int timeLeft = 10;
+        private int timeLeft = 5;
 
         private bool visited = false;
 
@@ -355,9 +355,18 @@ namespace FaceTracking3D
             return result;
         }
 
-        private void Button_Click_Reset(object sender, RoutedEventArgs e)
+        private void Button_Click_Save(object sender, RoutedEventArgs e)
         {
             this.saveModel = true;
+        }
+        private void Button_Click_Reset(object sender, RoutedEventArgs e)
+        {
+            faceTracker.ResetTracking();
+            counter.Text = "60 seconds";
+            this.saveModel = false;
+            this.visited = false;
+            this.number = 1;
+            this.timeLeft = 5;
         }
 
         private void saveFaceModel()

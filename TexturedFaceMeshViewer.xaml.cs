@@ -58,6 +58,8 @@ namespace FaceTracking3D
 
         private bool saveModel = false;
 
+        private string name = null;
+
         public TexturedFaceMeshViewer()
         {
             this.DataContext = this;
@@ -374,15 +376,17 @@ namespace FaceTracking3D
                     //howManyPointsA = pointsCount(fpA);
                     //facePointsADist[0] = (float) Math.Sqrt(Math.Pow(fpA[23].X - fpA[56].X, 2) + Math.Pow(fpA[23].Y - fpA[56].Y, 2) + Math.Pow(fpA[23].Z - fpA[56].Z, 2));
                     // MessageBox.Show("saved"+faceTrackFrame.GetTriangles()[0].Second);
-                    MessageBox.Show("saved first model");
-                    this.colorImageWritableBitmap.
+
+                    name = text.GetLineText(0);
+                    MessageBox.Show("saved model for " + name);
+
                     // save to file :
-                    System.IO.File.WriteAllText(@"C:\Kex\data\1.txt", "Micke");
+                    System.IO.File.WriteAllText(@"C:\Kex\data\"+name+".txt", name);
 
                     // Example #3: Write only some strings in an array to a file. 
                     // The using statement automatically closes the stream and calls  
                     // IDisposable.Dispose on the stream object. 
-                    using (System.IO.StreamWriter file = new System.IO.StreamWriter(@"C:\Kex\data\1.txt"))
+                    using (System.IO.StreamWriter file = new System.IO.StreamWriter(@"C:\Kex\data\"+name+".txt"))
                     {
                         foreach (Vector3DF fp in fpA)
                         {

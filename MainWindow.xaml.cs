@@ -93,5 +93,10 @@ namespace FaceTracking3D
             this.sensorChooser.Stop();
             this.faceTrackingVisualizer.Dispose();
         }
+
+        private void faceTrackingVisualizer_Loaded(object sender, RoutedEventArgs e)
+        {
+
+        }
     }
 }

@@ -20,14 +20,9 @@
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
-        <DockPanel Grid.Row="0" Margin="0 0 0 20">			 
-            <Image DockPanel.Dock="Left" Source="Images\Logo.png" Stretch="Fill" Height="32" Width="81" Margin="0 10 0 5"/>
-            <TextBlock DockPanel.Dock="Right" Margin="0 0 -1 0"  VerticalAlignment="Bottom" Foreground="{StaticResource MediumGreyBrush}" FontFamily="Segoe UI" FontSize="18">Face Tracking 3D</TextBlock>
-            <Image Grid.Column="1" Source="Images\Status.png" Stretch="None" HorizontalAlignment="Center" Margin="0 0 0 5"/>
-        </DockPanel>
         <Viewbox Grid.Row="1" Stretch="Uniform" HorizontalAlignment="Center">
             <Grid>
-                <local:TexturedFaceMeshViewer x:Name="faceTrackingVisualizer" Margin="0,0,45,58" />
+                <local:TexturedFaceMeshViewer x:Name="faceTrackingVisualizer" Margin="23,58,22,0" Loaded="faceTrackingVisualizer_Loaded" />
             </Grid>
         </Viewbox>
     </Grid>

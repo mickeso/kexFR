@@ -25,11 +25,11 @@ namespace FaceTracking3D
     public partial class TexturedFaceMeshViewer : UserControl, IDisposable
     {
         public static readonly DependencyProperty KinectProperty = DependencyProperty.Register(
-            "Kinect", 
-            typeof(KinectSensor), 
-            typeof(TexturedFaceMeshViewer), 
+            "Kinect",
+            typeof(KinectSensor),
+            typeof(TexturedFaceMeshViewer),
             new UIPropertyMetadata(
-                null, 
+                null,
                 (o, args) =>
                 ((TexturedFaceMeshViewer)o).OnKinectChanged((KinectSensor)args.OldValue, (KinectSensor)args.NewValue)));
 
@@ -55,9 +55,8 @@ namespace FaceTracking3D
 
         private float[,] facePointsADist = null;
 
-        private float[,] facePointsBDist = null;
-        //private int howManyPointsA = 0;         // delete this, only for test.
-       //private int howManyPointsB = 0;         // delete this, only for test.
+        private bool modelSaved = false;
+
         public TexturedFaceMeshViewer()
         {
             this.DataContext = this;
@@ -141,7 +140,7 @@ namespace FaceTracking3D
                     this.ColorImage.Source = this.colorImageWritableBitmap;
                     this.theMaterial.Brush = new ImageBrush(this.colorImageWritableBitmap)
                         {
-                           ViewportUnits = BrushMappingMode.Absolute 
+                            ViewportUnits = BrushMappingMode.Absolute
                         };
                 }
 
@@ -155,9 +154,9 @@ namespace FaceTracking3D
                 depthImageFrame.CopyPixelDataTo(this.depthImage);
                 skeletonFrame.CopySkeletonDataTo(this.skeletonData);
                 this.colorImageWritableBitmap.WritePixels(
-                    new Int32Rect(0, 0, colorImageFrame.Width, colorImageFrame.Height), 
-                    this.colorImage, 
-                    colorImageFrame.Width * Bgr32BytesPerPixel, 
+                    new Int32Rect(0, 0, colorImageFrame.Width, colorImageFrame.Height),
+                    this.colorImage,
+                    colorImageFrame.Width * Bgr32BytesPerPixel,
                     0);
 
                 // Find a skeleton to track.
@@ -190,8 +189,6 @@ namespace FaceTracking3D
                     }
                 }
 
-                bool displayFaceMesh = false;
-
                 if (skeletonOfInterest != null && skeletonOfInterest.TrackingState == SkeletonTrackingState.Tracked)
                 {
                     if (this.faceTracker == null)
@@ -219,12 +216,9 @@ namespace FaceTracking3D
                             this.depthImage,
                             skeletonOfInterest);
 
-                        if (faceTrackFrame.TrackSuccessful)
-                        {
-                           // this.UpdateMesh(faceTrackFrame);
-
-                            // Only display the face mesh if there was a successful track.
-                            displayFaceMesh = true;
+                        if (faceTrackFrame.TrackSuccessful && !modelSaved)
+                        {                            
+                            saveFaceModel();
                         }
                     }
                 }
@@ -233,7 +227,6 @@ namespace FaceTracking3D
                     this.trackingId = -1;
                 }
 
-                this.viewport3d.Visibility = displayFaceMesh ? Visibility.Visible : Visibility.Hidden;
             }
             finally
             {
@@ -295,25 +288,15 @@ namespace FaceTracking3D
                 }
             }
         }
-
-       public Boolean SaveFaceModel()
-        {
-            //trackedSkeletons[0]
-            return true;
-        }
-
-        private void giveGreenLight()
-        {
-            
-           
-            }
         
-    private float[,] calcDist(EnumIndexableCollection<FeaturePoint, Vector3DF> fp){
+        private float[,] calcDist(EnumIndexableCollection<FeaturePoint, Vector3DF> fp)
+        {
             int fpSize = fp.Count();
             Vector3DF[] temp = new Vector3DF[fpSize];
             float[,] fpRes = new float[fpSize, fpSize];
             int k = 0;
-            foreach(Vector3DF p in fp) {
+            foreach (Vector3DF p in fp)
+            {
                 temp[k] = p;
                 k++;
             }
@@ -321,80 +304,79 @@ namespace FaceTracking3D
             {
                 for (int j = 0; j < (fpSize - 1); j++)
                 {
-                    if (i == j) {  }
+                    if (i == j) { }
                     // Do stuff to temp!
-                    else { 
-                    fpRes[i,j] = Math.Abs((float)Math.Sqrt(Math.Pow(temp[i].X - temp[j].X, 2) + Math.Pow(temp[i].Y - temp[j].Y, 2) + Math.Pow(temp[i].Z - temp[j].Z, 2)));
+                    else
+                    {
+                        fpRes[i, j] = Math.Abs((float)Math.Sqrt((float)Math.Pow(temp[i].X - temp[j].X, 2) + (float)Math.Pow(temp[i].Y - temp[j].Y, 2) + (float)Math.Pow(temp[i].Z - temp[j].Z, 2)));
                     }
                 }
             }
             return fpRes;
-    }
-    private int pointsCount(EnumIndexableCollection<FeaturePoint, Vector3DF> fp)
-    {
-        int size = fp.Count();
-        return size;
-    }
-
-    private float calcDiff(float[,] a, float[,] b)
-    {
-        float result = 0;
-        for (int i = 0; i < 121; i++){
-            for (int j = 0; j < 121; j++)
-            {
-                result += a[i,j] - b[i,j];
-            }
-    }
-            return result;
-    }
-
-        private void Button_Click_Save(object sender, RoutedEventArgs e)
+        }
+        private int pointsCount(EnumIndexableCollection<FeaturePoint, Vector3DF> fp)
         {
-            Skeleton skeletonOfInterest =
-                    this.skeletonData.FirstOrDefault(
-                        skeleton =>
-                        skeleton.TrackingId == this.trackingId
-                        && skeleton.TrackingState != SkeletonTrackingState.NotTracked);
+            int size = fp.Count();
+            return size;
+        }
 
-            if (skeletonOfInterest != null && skeletonOfInterest.TrackingState == SkeletonTrackingState.Tracked)
+        private float calcDiff(float[,] a, float[,] b)
+        {
+            float result = 0;
+            for (int i = 0; i < 121; i++)
             {
-                FaceTrackFrame faceTrackFrame = this.faceTracker.Track(
-                                this.colorImageFormat,
-                                this.colorImage,
-                                this.depthImageFormat,
-                                this.depthImage,
-                                skeletonOfInterest);
-
-                if (faceTrackFrame.TrackSuccessful)
+                for (int j = 0; j < 121; j++)
                 {
-                     if (facePointsADist == null)
-                    {
-                    EnumIndexableCollection<FeaturePoint, Vector3DF> fpA = faceTrackFrame.Get3DShape();
-
-
-
-                    facePointsADist = calcDist(fpA);
-                    //howManyPointsA = pointsCount(fpA);
-                //facePointsADist[0] = (float) Math.Sqrt(Math.Pow(fpA[23].X - fpA[56].X, 2) + Math.Pow(fpA[23].Y - fpA[56].Y, 2) + Math.Pow(fpA[23].Z - fpA[56].Z, 2));
-                         // MessageBox.Show("saved"+faceTrackFrame.GetTriangles()[0].Second);
-                        MessageBox.Show("saved first model");
-                    }
-                     else
-                     {
-                         EnumIndexableCollection<FeaturePoint, Vector3DF> fpB = faceTrackFrame.Get3DShape();
-                         facePointsBDist = calcDist(fpB); 
-                         //(float)Math.Sqrt(Math.Pow(fpB[23].X - fpB[56].X, 2) + Math.Pow(fpB[23].Y - fpB[56].Y, 2) + Math.Pow(fpB[23].Z - fpB[56].Z, 2));
-                         float finResult = calcDiff(facePointsADist, facePointsBDist);
-                 
-                         //howManyPointsB = pointsCount(fpB);
-                         //MessageBox.Show("Points found on fpA: " + howManyPointsA + " and this many for fpB: " + howManyPointsB); // Only to check how many points were found.
-                         MessageBox.Show("Final result: " + finResult);
-                         facePointsADist = null;
-                     }
-
+                    result += Math.Abs(a[i, j] - b[i, j]);
                 }
             }
-            
+            return result;
+        }
+
+        private void Button_Click_Reset(object sender, RoutedEventArgs e)
+        {
+            this.faceTracker.ResetTracking();
+            modelSaved = false;
+        }
+
+        private void saveFaceModel()
+        {
+               this.modelSaved = true;          //notify model is saved:
+               Skeleton skeletonOfInterest =
+                        this.skeletonData.FirstOrDefault(
+                            skeleton =>
+                            skeleton.TrackingId == this.trackingId
+                            && skeleton.TrackingState != SkeletonTrackingState.NotTracked);
+
+                if (skeletonOfInterest != null && skeletonOfInterest.TrackingState == SkeletonTrackingState.Tracked){
+                    FaceTrackFrame faceTrackFrame = this.faceTracker.Track(
+                                    this.colorImageFormat,
+                                    this.colorImage,
+                                    this.depthImageFormat,
+                                    this.depthImage,
+                                    skeletonOfInterest);
+
+                    if (faceTrackFrame.TrackSuccessful)
+                    {
+                            EnumIndexableCollection<FeaturePoint, Vector3DF> fpA = faceTrackFrame.Get3DShape();
+                            EnumIndexableCollection<FeaturePoint, PointF> fpT = faceTrackFrame.GetProjected3DShape();
+
+
+                            facePointsADist = calcDist(fpA);
+                            //howManyPointsA = pointsCount(fpA);
+                            //facePointsADist[0] = (float) Math.Sqrt(Math.Pow(fpA[23].X - fpA[56].X, 2) + Math.Pow(fpA[23].Y - fpA[56].Y, 2) + Math.Pow(fpA[23].Z - fpA[56].Z, 2));
+                            // MessageBox.Show("saved"+faceTrackFrame.GetTriangles()[0].Second);
+                            MessageBox.Show("saved first model");
+
+                            // save to file :
+                       
+                           }
+                        
+
+                    }
+                }
+
+            }
         }
     }
 }

@@ -75,6 +75,7 @@
             </Viewport3D.Children>
 
         </Viewport3D>
-        <Button Height="50" Width="100" Margin="129,-57,98,334" Click="Button_Click_Save">Save face model</Button>
+        <Button Height="50" Width="100" Margin="42,-57,158,307" Click="Button_Click_Reset">Reset and match</Button>
+        <Button Height="50" Width="100" Margin="172,-57,28,307" Click="Button_Click_NewMatch">New match</Button>
     </Grid>
 </UserControl>

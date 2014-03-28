@@ -59,13 +59,14 @@ namespace FaceTracking3D
 
         private string name = null;
 
-        private int timeLeft = 60;
+        private int timeLeft = 10;
 
         private bool visited = false;
 
         static System.Windows.Forms.Timer aTimer = new System.Windows.Forms.Timer();
    
-       // private System.Timers.Timer aTimer = new System.Timers.Timer(1000);
+        private int number = 1;
+   
 
 
         public TexturedFaceMeshViewer()
@@ -356,7 +357,7 @@ namespace FaceTracking3D
 
         private void Button_Click_Reset(object sender, RoutedEventArgs e)
         {
-            saveModel = true;
+            this.saveModel = true;
         }
 
         private void saveFaceModel()
@@ -377,27 +378,17 @@ namespace FaceTracking3D
                                 this.depthImage,
                                 skeletonOfInterest);
 
-                if (faceTrackFrame.TrackSuccessful)
+                if (faceTrackFrame.TrackSuccessful && number <= 3)
                 {
                     EnumIndexableCollection<FeaturePoint, Vector3DF> fpA = faceTrackFrame.Get3DShape();
-                    EnumIndexableCollection<FeaturePoint, PointF> fpT = faceTrackFrame.GetProjected3DShape();
 
-
-
-                    facePointsADist = calcDist(fpA);
-                    //howManyPointsA = pointsCount(fpA);
-                    //facePointsADist[0] = (float) Math.Sqrt(Math.Pow(fpA[23].X - fpA[56].X, 2) + Math.Pow(fpA[23].Y - fpA[56].Y, 2) + Math.Pow(fpA[23].Z - fpA[56].Z, 2));
-                    // MessageBox.Show("saved"+faceTrackFrame.GetTriangles()[0].Second);
                     name = text.GetLineText(0);
-                    MessageBox.Show("saved model for " + name);
+                    MessageBox.Show("saved model " + number + " for " + name);
 
                     // save to file :
-                    System.IO.File.WriteAllText(@"C:\Kex\data\"+name+".txt", name);
+                    System.IO.File.WriteAllText(@"C:\Kex\data\"+name+number+".txt", name);
 
-                    // Example #3: Write only some strings in an array to a file. 
-                    // The using statement automatically closes the stream and calls  
-                    // IDisposable.Dispose on the stream object. 
-                    using (System.IO.StreamWriter file = new System.IO.StreamWriter(@"C:\Kex\data\"+name+".txt"))
+                    using (System.IO.StreamWriter file = new System.IO.StreamWriter(@"C:\Kex\data\"+name+number+".txt"))
                     {
                         foreach (Vector3DF fp in fpA)
                         {
@@ -407,7 +398,7 @@ namespace FaceTracking3D
                         }
                     }
 
-
+                    number++;
 
 
 
@@ -428,13 +419,8 @@ namespace FaceTracking3D
             }
             else
             {
-                // If the user ran out of time, stop the timer, show 
-                // a MessageBox, and fill in the answers.
                 aTimer.Stop();
                 counter.Text = "It's picture time!";
-                //MessageBox.Show("You didn't finish in time.", "Sorry!");
-               // sum.Value = addend1 + addend2;
-               // button.Enabled = true;
                 button.IsEnabled = true;
             }
         }

@@ -59,11 +59,11 @@ namespace FaceTracking3D
 
         private string name = null;
 
-        private int timeLeft = 5;
+        private int timeLeft = 60;
 
         private bool visited = false;
 
-        static System.Windows.Forms.Timer aTimer = new System.Windows.Forms.Timer();
+        static System.Windows.Forms.Timer aTimer;
    
         private int number = 1;
    
@@ -235,13 +235,19 @@ namespace FaceTracking3D
                             if (!visited) { 
                             visited = true;
                             //counter.Text = "60 seconds";
+                            aTimer = new System.Windows.Forms.Timer();
                             aTimer.Interval = 1000;
                             aTimer.Tick += new EventHandler(aTimer_Tick);
                             aTimer.Start();
                         }
                             if (saveModel) { saveFaceModel(); }
                             
-                        }
+                        }/*else if(visited)
+                        {
+                            aTimer.Dispose();
+                            visited = false;
+                            timeLeft = 60;
+                        }*/
                     }
                 }
                 else
@@ -366,7 +372,8 @@ namespace FaceTracking3D
             this.saveModel = false;
             this.visited = false;
             this.number = 1;
-            this.timeLeft = 5;
+            this.timeLeft = 60;
+            button.IsEnabled = false;
         }
 
         private void saveFaceModel()
@@ -396,7 +403,7 @@ namespace FaceTracking3D
 
                     // save to file :
                     System.IO.File.WriteAllText(@"C:\Kex\data\"+name+number+".txt", name);
-
+    
                     using (System.IO.StreamWriter file = new System.IO.StreamWriter(@"C:\Kex\data\"+name+number+".txt"))
                     {
                         foreach (Vector3DF fp in fpA)

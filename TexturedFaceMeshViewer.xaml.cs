@@ -59,6 +59,15 @@ namespace FaceTracking3D
 
         private string name = null;
 
+        private int timeLeft = 60;
+
+        private bool visited = false;
+
+        static System.Windows.Forms.Timer aTimer = new System.Windows.Forms.Timer();
+   
+       // private System.Timers.Timer aTimer = new System.Timers.Timer(1000);
+
+
         public TexturedFaceMeshViewer()
         {
             this.DataContext = this;
@@ -211,6 +220,8 @@ namespace FaceTracking3D
 
                     if (this.faceTracker != null)
                     {
+                        
+                       
                         FaceTrackFrame faceTrackFrame = this.faceTracker.Track(
                             this.colorImageFormat,
                             this.colorImage,
@@ -218,9 +229,17 @@ namespace FaceTracking3D
                             this.depthImage,
                             skeletonOfInterest);
 
-                        if (faceTrackFrame.TrackSuccessful && saveModel)
+                        if (faceTrackFrame.TrackSuccessful)
                         {
-                            saveFaceModel();
+                            if (!visited) { 
+                            visited = true;
+                            //counter.Text = "60 seconds";
+                            aTimer.Interval = 1000;
+                            aTimer.Tick += new EventHandler(aTimer_Tick);
+                            aTimer.Start();
+                        }
+                            if (saveModel) { saveFaceModel(); }
+                            
                         }
                     }
                 }
@@ -397,5 +416,30 @@ namespace FaceTracking3D
 
             }
         }
+
+        private void aTimer_Tick(object sender, EventArgs e)
+        {
+            if (this.timeLeft > 0)
+            {
+                // Display the new time left 
+                // by updating the Time Left label.
+                timeLeft = timeLeft - 1;
+                counter.Text = timeLeft + " seconds";
+            }
+            else
+            {
+                // If the user ran out of time, stop the timer, show 
+                // a MessageBox, and fill in the answers.
+                aTimer.Stop();
+                counter.Text = "It's picture time!";
+                //MessageBox.Show("You didn't finish in time.", "Sorry!");
+               // sum.Value = addend1 + addend2;
+               // button.Enabled = true;
+                button.IsEnabled = true;
+            }
+        }
+
+
+
     }
 }

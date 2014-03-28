@@ -72,8 +72,9 @@
             </ModelVisual3D>
 
         </Viewport3D>
-        <TextBox x:Name="text" Height="50" Width="100" Margin="33,-57,167,307" />
-        <Button Height="50" Width="100" Margin="157,-57,43,307" Click="Button_Click_Reset" Content="Reset and match"/>
-        
+        <TextBox x:Name="counter" Margin="24,-57,169,335" Text="60 seconds"  />
+        <TextBox x:Name="text" Margin="24,-29,169,307" />
+        <Button x:Name="button" IsEnabled="False" Height="50" Width="100" Margin="157,-57,43,307" Click="Button_Click_Reset" Content="Reset and match"/>
+
     </Grid>
 </UserControl>

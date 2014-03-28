@@ -18,6 +18,7 @@ namespace FaceTracking3D
     using Microsoft.Kinect.Toolkit.FaceTracking;
 
     using Point = System.Windows.Point;
+    using System.IO;
 
     /// <summary>
     /// Interaction logic for TexturedFaceMeshViewer.xaml
@@ -219,6 +220,7 @@ namespace FaceTracking3D
                         if (faceTrackFrame.TrackSuccessful && saveModel)
                         {
                             saveFaceModel();
+                                                       
                         }
                     }
                 }
@@ -245,6 +247,11 @@ namespace FaceTracking3D
                     skeletonFrame.Dispose();
                 }
             }
+        }
+
+        private void saveDepthImagebmp()
+        {
+            
         }
 
         private void DestroyFaceTracker()
@@ -368,7 +375,7 @@ namespace FaceTracking3D
                     //facePointsADist[0] = (float) Math.Sqrt(Math.Pow(fpA[23].X - fpA[56].X, 2) + Math.Pow(fpA[23].Y - fpA[56].Y, 2) + Math.Pow(fpA[23].Z - fpA[56].Z, 2));
                     // MessageBox.Show("saved"+faceTrackFrame.GetTriangles()[0].Second);
                     MessageBox.Show("saved first model");
-
+                    this.colorImageWritableBitmap.
                     // save to file :
                     System.IO.File.WriteAllText(@"C:\Kex\data\1.txt", "Micke");
 

@@ -55,7 +55,7 @@ namespace FaceTracking3D
 
         private float[,] facePointsADist = null;
 
-        private bool modelSaved = false;
+        private bool saveModel = false;
 
         public TexturedFaceMeshViewer()
         {
@@ -216,8 +216,8 @@ namespace FaceTracking3D
                             this.depthImage,
                             skeletonOfInterest);
 
-                        if (faceTrackFrame.TrackSuccessful && !modelSaved)
-                        {                            
+                        if (faceTrackFrame.TrackSuccessful && saveModel)
+                        {
                             saveFaceModel();
                         }
                     }
@@ -288,7 +288,7 @@ namespace FaceTracking3D
                 }
             }
         }
-        
+
         private float[,] calcDist(EnumIndexableCollection<FeaturePoint, Vector3DF> fp)
         {
             int fpSize = fp.Count();
@@ -335,46 +335,62 @@ namespace FaceTracking3D
 
         private void Button_Click_Reset(object sender, RoutedEventArgs e)
         {
-            this.faceTracker.ResetTracking();
-            modelSaved = false;
+            saveModel = true;
         }
 
         private void saveFaceModel()
         {
-               this.modelSaved = true;          //notify model is saved:
-               Skeleton skeletonOfInterest =
-                        this.skeletonData.FirstOrDefault(
-                            skeleton =>
-                            skeleton.TrackingId == this.trackingId
-                            && skeleton.TrackingState != SkeletonTrackingState.NotTracked);
+            this.saveModel = false;          //notify model is saved:
+            Skeleton skeletonOfInterest =
+                     this.skeletonData.FirstOrDefault(
+                         skeleton =>
+                         skeleton.TrackingId == this.trackingId
+                         && skeleton.TrackingState != SkeletonTrackingState.NotTracked);
 
-                if (skeletonOfInterest != null && skeletonOfInterest.TrackingState == SkeletonTrackingState.Tracked){
-                    FaceTrackFrame faceTrackFrame = this.faceTracker.Track(
-                                    this.colorImageFormat,
-                                    this.colorImage,
-                                    this.depthImageFormat,
-                                    this.depthImage,
-                                    skeletonOfInterest);
+            if (skeletonOfInterest != null && skeletonOfInterest.TrackingState == SkeletonTrackingState.Tracked)
+            {
+                FaceTrackFrame faceTrackFrame = this.faceTracker.Track(
+                                this.colorImageFormat,
+                                this.colorImage,
+                                this.depthImageFormat,
+                                this.depthImage,
+                                skeletonOfInterest);
 
-                    if (faceTrackFrame.TrackSuccessful)
+                if (faceTrackFrame.TrackSuccessful)
+                {
+                    EnumIndexableCollection<FeaturePoint, Vector3DF> fpA = faceTrackFrame.Get3DShape();
+                    EnumIndexableCollection<FeaturePoint, PointF> fpT = faceTrackFrame.GetProjected3DShape();
+
+
+
+                    facePointsADist = calcDist(fpA);
+                    //howManyPointsA = pointsCount(fpA);
+                    //facePointsADist[0] = (float) Math.Sqrt(Math.Pow(fpA[23].X - fpA[56].X, 2) + Math.Pow(fpA[23].Y - fpA[56].Y, 2) + Math.Pow(fpA[23].Z - fpA[56].Z, 2));
+                    // MessageBox.Show("saved"+faceTrackFrame.GetTriangles()[0].Second);
+                    MessageBox.Show("saved first model");
+
+                    // save to file :
+                    System.IO.File.WriteAllText(@"C:\Kex\data\1.txt", "Micke");
+
+                    // Example #3: Write only some strings in an array to a file. 
+                    // The using statement automatically closes the stream and calls  
+                    // IDisposable.Dispose on the stream object. 
+                    using (System.IO.StreamWriter file = new System.IO.StreamWriter(@"C:\Kex\data\1.txt"))
                     {
-                            EnumIndexableCollection<FeaturePoint, Vector3DF> fpA = faceTrackFrame.Get3DShape();
-                            EnumIndexableCollection<FeaturePoint, PointF> fpT = faceTrackFrame.GetProjected3DShape();
+                        foreach (Vector3DF fp in fpA)
+                        {
 
+                            file.WriteLine("" + fp.X + " , " + fp.Y + " , " + fp.Z);
 
-                            facePointsADist = calcDist(fpA);
-                            //howManyPointsA = pointsCount(fpA);
-                            //facePointsADist[0] = (float) Math.Sqrt(Math.Pow(fpA[23].X - fpA[56].X, 2) + Math.Pow(fpA[23].Y - fpA[56].Y, 2) + Math.Pow(fpA[23].Z - fpA[56].Z, 2));
-                            // MessageBox.Show("saved"+faceTrackFrame.GetTriangles()[0].Second);
-                            MessageBox.Show("saved first model");
-
-                            // save to file :
-                       
-                           }
-                        
-
+                        }
                     }
+
+
+
+
+
                 }
+
 
             }
         }

@@ -19,6 +19,7 @@ namespace FaceTracking3D
 
     using Point = System.Windows.Point;
     using System.IO;
+    using System.Drawing;
 
     /// <summary>
     /// Interaction logic for TexturedFaceMeshViewer.xaml
@@ -161,7 +162,7 @@ namespace FaceTracking3D
                     this.colorImage,
                     colorImageFrame.Width * Bgr32BytesPerPixel,
                     0);
-
+                
                 // Find a skeleton to track.
                 // First see if our old one is good.
                 // When a skeleton is in PositionOnly tracking state, don't pick a new one
@@ -222,6 +223,7 @@ namespace FaceTracking3D
                         if (faceTrackFrame.TrackSuccessful && saveModel)
                         {
                             saveFaceModel();
+                            
                                                        
                         }
                     }
@@ -249,6 +251,19 @@ namespace FaceTracking3D
                     skeletonFrame.Dispose();
                 }
             }
+        }
+
+        private void saveColorImage(String name)
+        {
+            Bitmap newBitmap;
+            using (MemoryStream ms = new MemoryStream(this.colorImage))
+            {
+                using (System.Drawing.Image newImage = System.Drawing.Image.FromStream(ms))
+                {
+                    newBitmap = new Bitmap(newImage);
+                    newBitmap.Save(@"C:\Kex\data\" + name +".bmp");
+                }
+            }         
         }
 
         private void saveDepthImagebmp()
@@ -367,6 +382,7 @@ namespace FaceTracking3D
 
                 if (faceTrackFrame.TrackSuccessful)
                 {
+                    
                     EnumIndexableCollection<FeaturePoint, Vector3DF> fpA = faceTrackFrame.Get3DShape();
                     EnumIndexableCollection<FeaturePoint, PointF> fpT = faceTrackFrame.GetProjected3DShape();
 
@@ -379,7 +395,7 @@ namespace FaceTracking3D
 
                     name = text.GetLineText(0);
                     MessageBox.Show("saved model for " + name);
-
+                    saveColorImage(name);
                     // save to file :
                     System.IO.File.WriteAllText(@"C:\Kex\data\"+name+".txt", name);
 
@@ -395,10 +411,6 @@ namespace FaceTracking3D
 
                         }
                     }
-
-
-
-
 
                 }
 

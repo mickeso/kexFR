@@ -8,8 +8,12 @@
              mc:Ignorable="d" 
              d:DesignHeight="300" d:DesignWidth="300">
     <Grid>
-        <Image x:Name="ColorImage" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" />
-        <Viewport3D Grid.Row="0" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Width="Auto" Height="Auto" x:Name="viewport3d" RenderTransformOrigin="0.5,0.5" Margin="766,13,-766,-13" >
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="28*"/>
+            <ColumnDefinition Width="47*"/>
+        </Grid.ColumnDefinitions>
+        <Image x:Name="ColorImage" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Grid.ColumnSpan="2" />
+        <Viewport3D Grid.Row="0" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Width="Auto" Height="Auto" x:Name="viewport3d" RenderTransformOrigin="0.5,0.5" Margin="654,13,-766,-13" Grid.Column="1" >
             <Viewport3D.RenderTransform>
                 <ScaleTransform ScaleX="2.0" ScaleY="2.0"/>
             </Viewport3D.RenderTransform>
@@ -72,7 +76,21 @@
             </ModelVisual3D>
 
         </Viewport3D>
-        <TextBox x:Name="text" Height="50" Width="100" Margin="33,-57,167,307" />
-        <Button Height="50" Width="100" Margin="157,-57,43,307" Click="Button_Click_Reset" Content="Reset and match"/>
+
+        <Grid Grid.ColumnSpan="2" Margin="-15,-159,-21,407" RenderTransformOrigin="0.5,0.5">
+            <Grid.RenderTransform>
+                <TransformGroup>
+                    <ScaleTransform/>
+                    <SkewTransform/>
+                    <RotateTransform Angle="-360.401"/>
+                    <TranslateTransform/>
+                </TransformGroup>
+            </Grid.RenderTransform>
+            <TextBox x:Name="counter" Margin="0,0,229,30" Height="30" Width="100"  />
+            <TextBox x:Name="text" Margin="0,30,229,0" Height="30" Width="100" Text="Name here" />
+            <Button x:Name="button" IsEnabled="False" Height="50" Width="100" Margin="121,0,115,2" Click="Button_Click_Save" Content="Save data"/>
+            <Button x:Name="buttonClear" Height="50" Width="100" Margin="236,2,0,0" Click="Button_Click_Reset" Content="Reset"/>
+
+        </Grid>
     </Grid>
 </UserControl>

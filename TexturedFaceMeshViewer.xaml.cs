@@ -61,6 +61,16 @@ namespace FaceTracking3D
 
         private string name = null;
 
+        private int timeLeft = 5;
+
+        private bool visited = false;
+
+        static System.Windows.Forms.Timer aTimer = new System.Windows.Forms.Timer();
+   
+        private int number = 1;
+   
+
+
         public TexturedFaceMeshViewer()
         {
             this.DataContext = this;
@@ -213,6 +223,8 @@ namespace FaceTracking3D
 
                     if (this.faceTracker != null)
                     {
+                        
+                       
                         FaceTrackFrame faceTrackFrame = this.faceTracker.Track(
                             this.colorImageFormat,
                             this.colorImage,
@@ -220,11 +232,16 @@ namespace FaceTracking3D
                             this.depthImage,
                             skeletonOfInterest);
 
-                        if (faceTrackFrame.TrackSuccessful && saveModel)
+                        if (faceTrackFrame.TrackSuccessful)
                         {
-                            saveFaceModel();
-                            
-                                                       
+                            if (!visited) { 
+                            visited = true;
+                            //counter.Text = "60 seconds";
+                            aTimer.Interval = 1000;
+                            aTimer.Tick += new EventHandler(aTimer_Tick);
+                            aTimer.Start();
+                        }
+                            if (saveModel) { saveFaceModel(); }
                         }
                     }
                 }
@@ -357,9 +374,18 @@ namespace FaceTracking3D
             return result;
         }
 
+        private void Button_Click_Save(object sender, RoutedEventArgs e)
+        {
+            this.saveModel = true;
+        }
         private void Button_Click_Reset(object sender, RoutedEventArgs e)
         {
-            saveModel = true;
+            faceTracker.ResetTracking();
+            counter.Text = "60 seconds";
+            this.saveModel = false;
+            this.visited = false;
+            this.number = 1;
+            this.timeLeft = 5;
         }
 
         private void saveFaceModel()
@@ -380,29 +406,17 @@ namespace FaceTracking3D
                                 this.depthImage,
                                 skeletonOfInterest);
 
-                if (faceTrackFrame.TrackSuccessful)
+                if (faceTrackFrame.TrackSuccessful && number <= 3)
                 {
                     
                     EnumIndexableCollection<FeaturePoint, Vector3DF> fpA = faceTrackFrame.Get3DShape();
-                    EnumIndexableCollection<FeaturePoint, PointF> fpT = faceTrackFrame.GetProjected3DShape();
-
-
-
-                    facePointsADist = calcDist(fpA);
-                    //howManyPointsA = pointsCount(fpA);
-                    //facePointsADist[0] = (float) Math.Sqrt(Math.Pow(fpA[23].X - fpA[56].X, 2) + Math.Pow(fpA[23].Y - fpA[56].Y, 2) + Math.Pow(fpA[23].Z - fpA[56].Z, 2));
-                    // MessageBox.Show("saved"+faceTrackFrame.GetTriangles()[0].Second);
-
                     name = text.GetLineText(0);
-                    MessageBox.Show("saved model for " + name);
-                    saveColorImage(name);
-                    // save to file :
-                    System.IO.File.WriteAllText(@"C:\Kex\data\"+name+".txt", name);
+                    MessageBox.Show("saved model " + number + " for " + name);
 
-                    // Example #3: Write only some strings in an array to a file. 
-                    // The using statement automatically closes the stream and calls  
-                    // IDisposable.Dispose on the stream object. 
-                    using (System.IO.StreamWriter file = new System.IO.StreamWriter(@"C:\Kex\data\"+name+".txt"))
+                    // save to file :
+                    System.IO.File.WriteAllText(@"C:\Kex\data\"+name+number+".txt", name);
+
+                    using (System.IO.StreamWriter file = new System.IO.StreamWriter(@"C:\Kex\data\"+name+number+".txt"))
                     {
                         foreach (Vector3DF fp in fpA)
                         {
@@ -411,11 +425,32 @@ namespace FaceTracking3D
 
                         }
                     }
+                    number++;
 
                 }
 
 
             }
         }
+
+        private void aTimer_Tick(object sender, EventArgs e)
+        {
+            if (this.timeLeft > 0)
+            {
+                // Display the new time left 
+                // by updating the Time Left label.
+                timeLeft = timeLeft - 1;
+                counter.Text = timeLeft + " seconds";
+            }
+            else
+            {
+                aTimer.Stop();
+                counter.Text = "It's picture time!";
+                button.IsEnabled = true;
+            }
+        }
+
+
+
     }
 }

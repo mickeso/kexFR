@@ -57,21 +57,13 @@ namespace FaceTracking3D
 
         private string name = null;
 
-<<<<<<< HEAD
+
         private int timeLeft = 10;
 
         private bool visited = false;
 
         static System.Windows.Forms.Timer aTimer = new System.Windows.Forms.Timer();
 
-=======
-        private int timeLeft = 60;
-
-        private bool visited = false;
-
-        static System.Windows.Forms.Timer aTimer;
-   
->>>>>>> 92df120343adad0ae03e50f1bdfe7c2aefd44332
         private int number = 1;
         
 
@@ -240,7 +232,7 @@ namespace FaceTracking3D
 
                         if (faceTrackFrame.TrackSuccessful)
                         {
-<<<<<<< HEAD
+
                             if (!visited)
                             {
                                 visited = true;
@@ -257,24 +249,7 @@ namespace FaceTracking3D
                                 
                             }
                         }
-=======
-                            if (!visited) { 
-                            visited = true;
-                            //counter.Text = "60 seconds";
-                            aTimer = new System.Windows.Forms.Timer();
-                            aTimer.Interval = 1000;
-                            aTimer.Tick += new EventHandler(aTimer_Tick);
-                            aTimer.Start();
-                        }
-                            if (saveModel) { saveFaceModel(); }
-                            
-                        }/*else if(visited)
-                        {
-                            aTimer.Dispose();
-                            visited = false;
-                            timeLeft = 60;
-                        }*/
->>>>>>> 92df120343adad0ae03e50f1bdfe7c2aefd44332
+
                     }
                 }
                 else

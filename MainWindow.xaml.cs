@@ -56,7 +56,8 @@ namespace FaceTracking3D
                 try
                 {
                     newSensor.ColorStream.Enable(ColorImageFormat.RgbResolution640x480Fps30);
-                    newSensor.DepthStream.Enable(DepthImageFormat.Resolution320x240Fps30);
+                    //newSensor.DepthStream.Enable(DepthImageFormat.Resolution320x240Fps30);
+                    newSensor.DepthStream.Enable(DepthImageFormat.Resolution640x480Fps30);
                     try
                     {
                         // This will throw on non Kinect For Windows devices.

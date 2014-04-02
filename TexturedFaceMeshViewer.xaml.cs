@@ -53,22 +53,19 @@ namespace FaceTracking3D
 
         private int trackingId = -1;
 
-        private FaceTriangle[] triangleIndices;
-
-        private float[,] facePointsADist = null;
-
         private bool saveModel = false;
 
         private string name = null;
 
-        private int timeLeft = 5;
+        private int timeLeft = 10;
 
         private bool visited = false;
 
         static System.Windows.Forms.Timer aTimer = new System.Windows.Forms.Timer();
-   
+
         private int number = 1;
-   
+        
+
 
 
         public TexturedFaceMeshViewer()
@@ -172,7 +169,7 @@ namespace FaceTracking3D
                     this.colorImage,
                     colorImageFrame.Width * Bgr32BytesPerPixel,
                     0);
-                
+
                 // Find a skeleton to track.
                 // First see if our old one is good.
                 // When a skeleton is in PositionOnly tracking state, don't pick a new one
@@ -182,7 +179,7 @@ namespace FaceTracking3D
                         skeleton =>
                         skeleton.TrackingId == this.trackingId
                         && skeleton.TrackingState != SkeletonTrackingState.NotTracked);
-
+                
                 if (skeletonOfInterest == null)
                 {
                     // Old one wasn't around.  Find any skeleton that is being tracked and use it.
@@ -192,6 +189,7 @@ namespace FaceTracking3D
 
                     if (skeletonOfInterest != null)
                     {
+                        
                         // This may be a different person so reset the tracker which
                         // could have tuned itself to the previous person.
                         if (this.faceTracker != null)
@@ -224,24 +222,30 @@ namespace FaceTracking3D
                     if (this.faceTracker != null)
                     {
                         
-                       
                         FaceTrackFrame faceTrackFrame = this.faceTracker.Track(
                             this.colorImageFormat,
                             this.colorImage,
                             this.depthImageFormat,
                             this.depthImage,
-                            skeletonOfInterest);
+                            skeletonOfInterest);                       
 
                         if (faceTrackFrame.TrackSuccessful)
                         {
-                            if (!visited) { 
-                            visited = true;
-                            //counter.Text = "60 seconds";
-                            aTimer.Interval = 1000;
-                            aTimer.Tick += new EventHandler(aTimer_Tick);
-                            aTimer.Start();
-                        }
-                            if (saveModel) { saveFaceModel(); }
+                            if (!visited)
+                            {
+                                visited = true;
+                                //counter.Text = "60 seconds";
+                                aTimer.Interval = 1000;
+                                aTimer.Tick += new EventHandler(aTimer_Tick);
+                                aTimer.Start();
+                            }                            
+                            if (saveModel)
+                            {
+                                saveDepthImagebmp(depthImageFrame);
+                                saveColorImage(colorImageFrame.Width, colorImageFrame.Height, (colorImageFrame.Width * Bgr32BytesPerPixel));
+                                saveFaceModel();
+                                
+                            }
                         }
                     }
                 }
@@ -269,23 +273,93 @@ namespace FaceTracking3D
                 }
             }
         }
-
-        private void saveColorImage(String name)
+        
+        private void saveColorImage(int width, int height, int stride)
         {
-            Bitmap newBitmap;
-            using (MemoryStream ms = new MemoryStream(this.colorImage))
+
+            BitmapEncoder encoder = new PngBitmapEncoder();
+            BitmapFrame bmf = BitmapFrame.Create(BitmapSource.Create(width, height, 96, 96, PixelFormats.Bgr32, null, this.colorImage, stride));
+            encoder.Frames.Add(bmf);
+
+            string path = System.IO.Path.Combine(@"C:\Kex\data\", name + number + ".png");
+
+            try
             {
-                using (System.Drawing.Image newImage = System.Drawing.Image.FromStream(ms))
+                using (FileStream fs = new FileStream(path, FileMode.Create))
                 {
-                    newBitmap = new Bitmap(newImage);
-                    newBitmap.Save(@"C:\Kex\data\" + name +".bmp");
+                    encoder.Save(fs);
                 }
-            }         
+            }
+            catch (IOException ioe)
+            {
+                Console.WriteLine(ioe.ToString());
+            }
+
         }
 
-        private void saveDepthImagebmp()
+
+        private void saveDepthImagebmp(DepthImageFrame depthFrame)
         {
+            // Get the min and max reliable depth for the current frame
+           //int minDepth = depthFrame.MinDepth;
+            int minDepth = 700;
+            int maxDepth = 1300;
+
+           //int maxDepth = depthFrame.MaxDepth;
+           
+
+            DepthImagePixel[] depthPixels = new DepthImagePixel[depthFrame.PixelDataLength];
+            depthFrame.CopyDepthImagePixelDataTo(depthPixels);
+            byte[] colorPixels = new byte[depthFrame.PixelDataLength * sizeof(int)];
             
+            // Convert the depth to RGB
+            int colorPixelIndex = 0;
+            for (int i = 0; i < depthPixels.Length; ++i)
+            {
+                // Get the depth for this pixel
+                short depth = depthPixels[i].Depth;
+                
+                // Note: Using conditionals in this loop could degrade performance.
+                // Consider using a lookup table instead when writing production code.
+                // See the KinectDepthViewer class used by the KinectExplorer sample
+                // for a lookup table example.
+                byte intensity = (byte)(depth >= minDepth && depth <= maxDepth ? depth : int.MaxValue);
+
+                // Write out blue byte
+                colorPixels[colorPixelIndex++] = intensity;
+
+                // Write out green byte
+                colorPixels[colorPixelIndex++] = intensity;
+
+                // Write out red byte                        
+                colorPixels[colorPixelIndex++] = intensity;
+
+                // We're outputting BGR, the last byte in the 32 bits is unused so skip it
+                // If we were outputting BGRA, we would write alpha here.
+                ++colorPixelIndex;
+            }
+
+
+            int stride = (depthFrame.Width * Bgr32BytesPerPixel);
+            BitmapEncoder encoder = new PngBitmapEncoder();
+            BitmapFrame bmf = BitmapFrame.Create(BitmapSource.Create(depthFrame.Width, depthFrame.Height, 96, 96, PixelFormats.Bgr32, null, colorPixels, stride));
+
+            encoder.Frames.Add(bmf);
+
+            string path = System.IO.Path.Combine(@"C:\Kex\data\", name + number + "d.png");
+
+            try
+            {
+                using (FileStream fs = new FileStream(path, FileMode.Create))
+                {
+                    encoder.Save(fs);
+                }
+            }
+            catch (IOException ioe)
+            {
+                Console.WriteLine(ioe.ToString());
+            }
+
         }
 
         private void DestroyFaceTracker()
@@ -376,12 +450,15 @@ namespace FaceTracking3D
 
         private void Button_Click_Save(object sender, RoutedEventArgs e)
         {
+            name = text.GetLineText(0);
             this.saveModel = true;
         }
+
+
         private void Button_Click_Reset(object sender, RoutedEventArgs e)
         {
             faceTracker.ResetTracking();
-            counter.Text = "60 seconds";
+            counter.Text = "5 seconds";
             this.saveModel = false;
             this.visited = false;
             this.number = 1;
@@ -408,15 +485,13 @@ namespace FaceTracking3D
 
                 if (faceTrackFrame.TrackSuccessful && number <= 3)
                 {
-                    
-                    EnumIndexableCollection<FeaturePoint, Vector3DF> fpA = faceTrackFrame.Get3DShape();
-                    name = text.GetLineText(0);
+                    EnumIndexableCollection<FeaturePoint, Vector3DF> fpA = faceTrackFrame.Get3DShape();                    
                     MessageBox.Show("saved model " + number + " for " + name);
-
+                    //saveColorImage(name);
                     // save to file :
-                    System.IO.File.WriteAllText(@"C:\Kex\data\"+name+number+".txt", name);
+                    System.IO.File.WriteAllText(@"C:\Kex\data\" + name + number + ".txt", name);
 
-                    using (System.IO.StreamWriter file = new System.IO.StreamWriter(@"C:\Kex\data\"+name+number+".txt"))
+                    using (System.IO.StreamWriter file = new System.IO.StreamWriter(@"C:\Kex\data\" + name + number + ".txt"))
                     {
                         foreach (Vector3DF fp in fpA)
                         {
